@@ -1,4 +1,3 @@
-// components/Navbar.js
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../utils/supabaseClient'
 import { useRouter } from 'next/router'
@@ -11,22 +10,22 @@ export default function Navbar({ onSearch }) {
   const [searchQuery, setSearchQuery] = useState('')
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value)
-    onSearch(e.target.value)
+    const value = e.target.value
+    setSearchQuery(value)
+    onSearch(value)
   }
-
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/')
   }
 
-    return (
+  return (
     <header style={navWrapper}>
-      <nav style={navBar}>
+      <div style={navContent}>
         {/* Logo bên trái */}
         <div style={logoStyle}>
-          <Link href="/">
+          <Link href="/" style={{ textDecoration: 'none', color: '#000' }}>
             <span style={{ fontWeight: 'bold', fontSize: '1.25rem' }}>RianShop</span>
           </Link>
         </div>
@@ -44,46 +43,50 @@ export default function Navbar({ onSearch }) {
 
         {/* Buttons bên phải */}
         <div style={buttonGroup}>
-           {user ? (
+          {user ? (
             <>
-              <a href="/create" style={buttonStyle}>+Create</a>
+              <Link href="/create" style={buttonStyle}>+Create</Link>
               <button onClick={handleLogout} style={buttonStyle}>Logout</button>
             </>
           ) : (
-            <a href="/auth" style={buttonStyle}>Login</a>
+            <Link href="/auth" style={buttonStyle}>Login</Link>
           )}
         </div>
-      </nav>
+      </div>
     </header>
-  );
+  )
 }
-// Custom styles
+
+// === Style ===
+
 const navWrapper = {
   position: 'sticky',
   top: 0,
-  zIndex: 999,
+  width: '100%',
   backgroundColor: '#fff',
   boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+  zIndex: 999,
 };
 
-const navBar = {
+const navContent = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: '0.5rem 2rem',
   maxWidth: '1200px',
   margin: '0 auto',
+  padding: '0.5rem 1.5rem',
   height: '64px',
 };
 
 const logoStyle = {
-  flex: '1',
+  flex: 1,
 };
 
 const searchContainer = {
-  flex: '2',
+  flex: 2,
   display: 'flex',
   justifyContent: 'center',
+  padding: '0 1rem',
 };
 
 const searchInput = {
@@ -92,79 +95,25 @@ const searchInput = {
   padding: '0.5rem 1rem',
   border: '1px solid #ccc',
   borderRadius: '6px',
+  fontSize: '0.9rem',
 };
 
 const buttonGroup = {
+  flex: 1,
   display: 'flex',
-  gap: '0.5rem',
-  flex: '1',
   justifyContent: 'flex-end',
+  gap: '0.5rem',
 };
 
 const buttonStyle = {
-  padding: '0.4rem 0.8rem',
+  padding: '0.45rem 0.9rem',
   border: 'none',
   borderRadius: '5px',
   backgroundColor: '#000',
   color: '#fff',
-  fontWeight: '500',
+  fontWeight: 500,
+  fontSize: '0.85rem',
   cursor: 'pointer',
+  textDecoration: 'none',
+  display: 'inline-block',
 };
-
-// const navbarStyle = {
-//   backgroundColor: 'black',
-//   position: 'sticky',
-//   top: 0,
-//   zIndex: 1000,
-//   padding: '0.25rem 0',  // Giảm chiều cao
-// };
-
-// const navContainer = {
-//   maxWidth: '1200px',
-//   margin: '0 auto',
-//   display: 'flex',
-//   alignItems: 'center',
-//   justifyContent: 'space-between',
-//   padding: '0.5rem 1rem',
-// };
-
-// const logoStyle = {
-//   fontSize: '1.2rem',
-//   color: '#fff',
-//   fontWeight: 'bold',
-//   flex: 1,
-// };
-
-// const searchContainer = {
-//   flex: 2,
-//   display: 'flex',
-//   justifyContent: 'center',
-// };
-
-// const searchInputStyle = {
-//   width: '100%',
-//   maxWidth: '280px',
-//   padding: '0.4rem 0.8rem',
-//   borderRadius: '4px',
-//   border: '1px solid #ccc',
-//   fontSize: '0.9rem',
-// };
-
-// const navActions = {
-//   flex: 1,
-//   display: 'flex',
-//   justifyContent: 'flex-end',
-//   alignItems: 'center',
-//   gap: '0.5rem',
-// };
-
-// const buttonStyle = {
-//   backgroundColor: '#fff',
-//   color: '#000',
-//   border: '1px solid #ccc',
-//   padding: '0.4rem 0.8rem',
-//   borderRadius: '4px',
-//   fontWeight: 500,
-//   cursor: 'pointer',
-//   fontSize: '0.85rem',
-// };
