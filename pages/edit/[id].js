@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import ProductForm from '../../components/ProductForm';
+import { useAuth } from '../../context/AuthContext';
 
 export default function EditProduct() {
     const { id } = useRouter().query;
@@ -13,6 +14,25 @@ export default function EditProduct() {
                 .then(setProduct);
         }
     }, [id]);
+
+
+
+const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/auth'); // Chuyển hướng về trang đăng nhập nếu người dùng chưa đăng nhập
+    }
+  }, [user, router]);
+
+  if (!user) {
+    return <div>Loading...</div>; // Hoặc có thể hiển thị loading
+  }
+
+
+
+
 
     // const handleUpdate = async (formData) => {
     //     const res = await fetch(`/api/products/${id}`, {

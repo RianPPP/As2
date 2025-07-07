@@ -4,30 +4,38 @@ import { useState } from 'react';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { FiMoreVertical } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext'; // Import useAuth context
 
 export default function ProductCard({ product }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
+  const { user } = useAuth(); // Lấy thông tin người dùng từ AuthContext
 
 
+  const menuRef = useRef();
 
-const menuRef = useRef();
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
 
-useEffect(() => {
-  const handleClickOutside = (e) => {
-    if (menuRef.current && !menuRef.current.contains(e.target)) {
-      setMenuOpen(false);
-    }
-  };
-
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => {
-    document.removeEventListener('mousedown', handleClickOutside);
-  };
-}, []);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
 
+  // 
   const handleDelete = async () => {
+    if (!user) {
+      alert('You need to be logged in to delete a product!');
+      router.push('/auth'); // Chuyển hướng về trang đăng nhập nếu chưa đăng nhập
+      return;
+    }
+
     const confirmed = confirm('Are you sure you want to delete this product?');
     if (!confirmed) return;
 
@@ -86,31 +94,31 @@ useEffect(() => {
         </button>
 
         {/* Menu dropdown */}
-{menuOpen && (
-  <div ref={menuRef}
-    style={{
-      position: 'absolute',
-      top: '28px',
-      right: '0',
-      background: '#fff',
-      border: '1px solid #eee',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-      borderRadius: '6px',
-      width: '130px',
-      zIndex: 1000,
-    }}
-  >
-    <div onClick={() => router.push(`/edit/${product.id}`)} style={menuItem}>
-      ✏️ Edit
-    </div>
-    <div
-      onClick={handleDelete}
-      style={{ ...menuItem, color: 'red', borderTop: '1px solid #eee' }}
-    >
-      🗑️ Delete
-    </div>
-  </div>
-)}
+        {menuOpen && (
+          <div ref={menuRef}
+            style={{
+              position: 'absolute',
+              top: '28px',
+              right: '0',
+              background: '#fff',
+              border: '1px solid #eee',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+              borderRadius: '6px',
+              width: '130px',
+              zIndex: 1000,
+            }}
+          >
+            <div onClick={() => router.push(`/edit/${product.id}`)} style={menuItem}>
+              ✏️ Edit
+            </div>
+            <div
+              onClick={handleDelete}
+              style={{ ...menuItem, color: 'red', borderTop: '1px solid #eee' }}
+            >
+              🗑️ Delete
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

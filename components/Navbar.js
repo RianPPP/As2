@@ -46,6 +46,7 @@ export default function Navbar({ onSearch }) {
           {user ? (
             <>
               <Link href="/create" style={buttonStyle}>+Create</Link>
+              
               <button onClick={handleLogout} style={buttonStyle}>Logout</button>
             </>
           ) : (
