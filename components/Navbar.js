@@ -110,7 +110,7 @@ const buttonStyle = {
   border: 'none',
   borderRadius: '5px',
   backgroundColor: '#000',
-  color: '#fff',
+  color: 'gray',
   fontWeight: 500,
   fontSize: '0.85rem',
   cursor: 'pointer',
