@@ -9,6 +9,8 @@ export default function ProductCard({ product }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
+
+
 const menuRef = useRef();
 
 useEffect(() => {

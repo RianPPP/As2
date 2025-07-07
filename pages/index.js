@@ -1,192 +1,99 @@
-// //Home page
-
-// import { useEffect, useState } from 'react';
-// import ProductCard from '../components/ProductCard';
-
-// export default function Home() {
-//     const [products, setProducts] = useState([]);
-//     const [query, setQuery] = useState('');
-//     const [page, setPage] = useState(1);
-//     const itemsPerPage = 6;
-
-//     const paginated = products.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-
-
-//     <input
-//         type="text"
-//         placeholder="Search..."
-//         value={query}
-//         onChange={(e) => setQuery(e.target.value)}
-//         style={{ margin: '1rem 0', padding: '0.5rem', width: '300px' }}
-//     />
-
-//     {
-//         products
-//             .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
-//             .map(product => (
-//                 <ProductCard key={product.id} product={product} />
-//             ))
-//     }
-//     useEffect(() => {
-//         fetch('/api/products')
-//             .then(res => res.json())
-//             .then(data => setProducts(data));
-//     }, []);
-
-
-
-//     return (
-//         <div>
-//             <header>
-//                 <h1>Clothing Store</h1>
-//                 <nav>
-//                     <a href="/">Home</a> | <a href="/create">Create Product</a>
-//                 </nav>
-//             </header>
-
-//             <main style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-//                 {products.map(product => (
-//                     <ProductCard key={product.id} product={product} />
-//                 ))}
-//             </main>
-//             <div style={{ marginTop: '2rem' }}>
-//                 <button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</button>
-//                 <span style={{ margin: '0 1rem' }}>Page {page}</span>
-//                 <button disabled={page * itemsPerPage >= products.length} onClick={() => setPage(page + 1)}>Next</button>
-//             </div>
-//         </div>
-
-
-//     );
-
-// }
+import { supabase } from '@/utils/supabaseClient';
 import { useEffect, useState } from 'react';
-import ProductCard from '../components/ProductCard';
+
+import Navbar from '../components/Navbar';
+import ProductGrid from '@/components/ProductGrid';
 
 export default function Home() {
-    const [products, setProducts] = useState([]);
-    const [query, setQuery] = useState('');
-    const [page, setPage] = useState(1);
-    const itemsPerPage = 8;
+    const [allProducts, setAllProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+
+    // 💡 Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const productsPerPage = 6;
 
     useEffect(() => {
-        fetch('/api/products')
-            .then(res => res.json())
-            .then(data => setProducts(data));
+        const fetchProducts = async () => {
+            const { data, error } = await supabase.from('products').select('*');
+            if (error) {
+                console.error(error);
+            } else {
+                setAllProducts(data);
+                setFilteredProducts(data);
+            }
+        };
+        fetchProducts();
     }, []);
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(query.toLowerCase())
-    );
+    const handleSearch = (query) => {
+        const filtered = allProducts.filter(
+            (product) =>
+                product.name.toLowerCase().includes(query.toLowerCase()) ||
+                product.description?.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredProducts(filtered);
+        setCurrentPage(1); // reset to first page when searching
+    };
 
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-    const paginatedProducts = filteredProducts.slice(
-        (page - 1) * itemsPerPage,
-        page * itemsPerPage
-    );
+    // 🔢 Pagination logic
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+    const startIndex = (currentPage - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
-    const handleSearchChange = (e) => {
-        setQuery(e.target.value);
-        setPage(1); // Reset to first page when searching
+    const handlePrev = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNext = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
     };
 
     return (
-        <div style={{ padding: '2rem' }}>
-            {/* Navigation */}
-            <header
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '2rem',
-                }}
-            >
-                {/* Trái: logo giả nếu cần thêm sau */}
-                <div style={{ flex: 1 }}></div>
+        <>
 
-                {/* Giữa: Tên Shop với link về trang chủ */}
-                <div style={{ flex: 1, textAlign: 'center' }}>
-                    <a href="/" style={{ fontSize: '2rem', textDecoration: 'none', color: '#000', fontWeight: 'bold' }}>
-                        RianShop
-                    </a>
+            <div style={{ padding: '2rem' }}>
+                {/* Navigation */}
+                <Navbar onSearch={handleSearch} />
+                {/* Banner - Full Width */}
+                <div style={bannerWrapper}>
+                    <img src="/images/banner.png" alt="Banner" style={bannerImage} />
                 </div>
+                {/* Product Grid */}
+                <ProductGrid products={paginatedProducts} />
 
-                {/* Phải: Menu + Search */}
-                <nav
-                    style={{
-                        flex: 1,
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: '1rem',
-                        alignItems: 'center',
-                    }}
-                >
-                    <a href="/create" style={navLink}>+Create</a>
-
-                    <input
-                        type="text"
-                        placeholder="🔎Search..."
-                        value={query}
-                        onChange={handleSearchChange}
-                        style={{
-                            padding: '0.5rem',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            width: '200px',
-                        }}
-                    />
-                </nav>
-            </header>
-
-
-            {/* Product Grid */}
-            <main
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: '1.5rem',
-                    //justifyItems: 'stretch',
-                }}
-            >
-                {paginatedProducts.length > 0 ? (
-                    paginatedProducts.map(product => (
-                        <ProductCard key={product.id} product={product} />
-                    ))
-                ) : (
-                    <p>No products found.</p>
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div style={paginationStyle}>
+                        <button
+                            onClick={handlePrev}
+                            disabled={currentPage === 1}
+                            style={pageButton}
+                        >
+                            ◀ Prev
+                        </button>
+                        <span style={{ margin: '0 1rem' }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            onClick={handleNext}
+                            disabled={currentPage === totalPages}
+                            style={pageButton}
+                        >
+                            Next ▶
+                        </button>
+                    </div>
                 )}
-            </main>
-
-            {/* Pagination */}
-            <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-                <button
-                    onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                    disabled={page === 1}
-                    style={pageButton}
-                >
-                    ← Previous
-                </button>
-
-                <span style={{ margin: '0 1rem' }}>
-                    Page {page} of {totalPages}
-                </span>
-
-                <button
-                    onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={page === totalPages}
-                    style={pageButton}
-                >
-                    Next →
-                </button>
             </div>
-        </div>
-    );
+        </>);
 }
 
-const navLink = {
-    textDecoration: 'none',
-    color: '#0070f3',
-    fontWeight: 'bold',
+// 🔽 Style
+const paginationStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: '2rem',
 };
 
 const pageButton = {
@@ -196,3 +103,27 @@ const pageButton = {
     cursor: 'pointer',
     margin: '0 0.5rem',
 };
+
+const navLink = {
+    textDecoration: 'none',
+    color: '#0070f3',
+    fontWeight: 'bold',
+};
+
+const bannerWrapper = {
+  position: 'relative',
+  left: '50%',
+  right: '50%',
+  marginLeft: '-50vw',
+  marginRight: '-50vw',
+  width: '100vw',
+  overflow: 'hidden',
+  zIndex: 1,
+};
+
+const bannerImage = {
+  width: '100%',
+  height: 'auto',
+  display: 'block',
+};
+
